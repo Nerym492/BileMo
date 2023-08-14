@@ -23,13 +23,13 @@ class ProductFixtures extends Fixture
             'Xiaomi Redmi Note 12 5G',
             'Xiaomi',
             'The best smartphone under 300 euros',
-            239,
+            239
         );
         $this->addProduct(
             'Apple iPhone 14 Pro',
             'Apple',
             'The best iPhone available',
-            1109,
+            1109
         );
         $this->addProduct(
             'Google Pixel 7',
@@ -47,6 +47,7 @@ class ProductFixtures extends Fixture
         $product->setName($name);
         $product->setBrand($brand);
         $product->setDescription($description);
+        $product->setPrice($price);
 
         $this->entityManager->persist($product);
     }
