@@ -167,4 +167,12 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    /**
+     * Method used to authenticate the customer.
+     */
+    public function getUsername(): string
+    {
+        return $this->getUserIdentifier();
+    }
 }
