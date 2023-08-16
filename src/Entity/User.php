@@ -5,9 +5,12 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
+#[UniqueEntity(fields: ['email'], message: 'The email {{ value }} is already used.')]
 class User
 {
     #[ORM\Id]
@@ -17,14 +20,30 @@ class User
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "The first name can't be empty")]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'The first name must be at least 3 characters long',
+        maxMessage: 'The first name must not exceed 50 characters.'
+    )]
     #[Groups(['getUsers'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "The last name can't be empty")]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'The last name must be at least {{ limit }} characters long',
+        maxMessage: 'The last name must not exceed {{ limit }} characters.'
+    )]
     #[Groups(['getUsers'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 180)]
+    #[Assert\NotBlank(message: "The email can't be empty.")]
+    #[Assert\Email(message: '{{ value }} is not a valid email.')]
     #[Groups(['getUsers'])]
     private ?string $email = null;
 
