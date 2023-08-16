@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-#[UniqueEntity(fields: ['email'], message: 'The email {{ value }} is already used.')]
+#[UniqueEntity(fields: ['email'], message: 'This email is already used.')]
 class User
 {
     #[ORM\Id]
