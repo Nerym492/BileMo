@@ -48,7 +48,12 @@ class UserController extends AbstractController
         $errors = $validator->validate($user);
 
         if ($errors->count() > 0) {
-            return new JsonResponse($this->serializer->serialize($errors, 'json'));
+            return new JsonResponse(
+                $this->serializer->serialize($errors, 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],
+                true
+            );
         }
 
         // Link the logged customer to the created user
