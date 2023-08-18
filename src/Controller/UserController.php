@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class UserController extends AbstractController
@@ -31,19 +32,25 @@ class UserController extends AbstractController
 
     #[Route('/api/users', name: 'users', methods: ['GET'])]
     #[IsGranted('ROLE_CUSTOMER', message: 'You do not have the required rights to view the list of users.')]
-    public function getUserList(TagAwareCacheInterface $tagAwareCache, Request $request): JsonResponse
+    public function getUserList(TagAwareCacheInterface $cache, Request $request): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 3);
 
-        $users = $this->userRepository->findByCustomer(
-            $this->security->getUser()->getUserIdentifier(),
-            $page,
-            $limit
-        );
+        $cacheId = 'getUserList-'.$page.'-'.$limit;
+
+        $userList = $cache->get($cacheId, function (ItemInterface $item) use ($page, $limit) {
+            $item->tag('usersCache');
+
+            return $this->userRepository->findByCustomer(
+                $this->security->getUser()->getUserIdentifier(),
+                $page,
+                $limit
+            );
+        });
 
         $context = SerializationContext::create()->setGroups(['getUsers']);
-        $jsonUsers = $this->serializer->serialize($users, 'json', $context);
+        $jsonUsers = $this->serializer->serialize($userList, 'json', $context);
 
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
@@ -80,13 +87,20 @@ class UserController extends AbstractController
 
     #[Route('/api/users/{id}', name: 'detailUser', methods: ['GET'])]
     #[IsGranted('ROLE_CUSTOMER', message: 'You do not have the required rights to see a detailed user.')]
-    public function getDetailUser(User $user): JsonResponse
+    public function getDetailUser(User $user, TagAwareCacheInterface $cache): JsonResponse
     {
         $context = SerializationContext::create()->setGroups('getUsers');
-        $users = $this->userRepository->findByCustomer(
-            email: $this->security->getUser()->getUserIdentifier(),
-            user: $user
-        );
+
+        $cacheId = 'detailUser-'.$user->getId();
+
+        $users = $cache->get($cacheId, function (ItemInterface $item) use ($user) {
+            $item->tag('usersCache');
+
+            return $this->userRepository->findByCustomer(
+                email: $this->security->getUser()->getUserIdentifier(),
+                user: $user
+            );
+        });
 
         $jsonUsers = $this->serializer->serialize($users, 'json', $context);
 
@@ -95,7 +109,7 @@ class UserController extends AbstractController
 
     #[Route('/api/users/{id}', name: 'deleteUser', methods: ['DELETE'])]
     #[IsGranted('ROLE_CUSTOMER', message: 'You do not have the required rights to delete a user.')]
-    public function deleteUser(User $user): JsonResponse
+    public function deleteUser(User $user, TagAwareCacheInterface $cache): JsonResponse
     {
         $customerMail = $this->security->getUser()->getUserIdentifier();
         $customerId = $this->customerRepository->findOneBy(['email' => $customerMail]);
@@ -114,6 +128,9 @@ class UserController extends AbstractController
 
         $this->entityManager->remove($user);
         $this->entityManager->flush();
+
+        // Empty the cache
+        $cache->invalidateTags(['usersCache']);
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
