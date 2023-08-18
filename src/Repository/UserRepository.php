@@ -24,7 +24,7 @@ class UserRepository extends ServiceEntityRepository
     /**
      * @return User[] Returns an array of User objects
      */
-    public function findByCustomer(string $email, User $user = null): array
+    public function findByCustomer(string $email, int $page = 0, int $limit = 0, User $user = null): array
     {
         $usersQuery = $this->createQueryBuilder('u')
             ->leftJoin('u.customer', 'c')
@@ -37,7 +37,14 @@ class UserRepository extends ServiceEntityRepository
                 ->setParameter('userId', $user->getId());
         }
 
-        return $usersQuery->orderBy('u.id', 'ASC')->getQuery()->getResult();
+        if (0 !== $page and 0 !== $limit) {
+            $usersQuery->setFirstResult(($page - 1) * $limit)
+                ->setMaxResults($limit);
+        }
+
+        return $usersQuery->orderBy('u.id', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     //    public function findOneBySomeField($value): ?User

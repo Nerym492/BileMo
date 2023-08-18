@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class UserController extends AbstractController
 {
@@ -30,9 +31,16 @@ class UserController extends AbstractController
 
     #[Route('/api/users', name: 'users', methods: ['GET'])]
     #[IsGranted('ROLE_CUSTOMER', message: 'You do not have the required rights to view the list of users.')]
-    public function getUserList(): JsonResponse
+    public function getUserList(TagAwareCacheInterface $tagAwareCache, Request $request): JsonResponse
     {
-        $users = $this->userRepository->findByCustomer($this->security->getUser()->getUserIdentifier());
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 3);
+
+        $users = $this->userRepository->findByCustomer(
+            $this->security->getUser()->getUserIdentifier(),
+            $page,
+            $limit
+        );
 
         $context = SerializationContext::create()->setGroups(['getUsers']);
         $jsonUsers = $this->serializer->serialize($users, 'json', $context);
@@ -76,8 +84,8 @@ class UserController extends AbstractController
     {
         $context = SerializationContext::create()->setGroups('getUsers');
         $users = $this->userRepository->findByCustomer(
-            $this->security->getUser()->getUserIdentifier(),
-            $user
+            email: $this->security->getUser()->getUserIdentifier(),
+            user: $user
         );
 
         $jsonUsers = $this->serializer->serialize($users, 'json', $context);
