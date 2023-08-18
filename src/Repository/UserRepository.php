@@ -24,16 +24,20 @@ class UserRepository extends ServiceEntityRepository
     /**
      * @return User[] Returns an array of User objects
      */
-    public function findByCustomer(string $email): array
+    public function findByCustomer(string $email, User $user = null): array
     {
-        return $this->createQueryBuilder('u')
+        $usersQuery = $this->createQueryBuilder('u')
             ->leftJoin('u.customer', 'c')
             ->andWhere('c.email = :customerEmail')
-            ->setParameter('customerEmail', $email)
-            ->orderBy('u.id', 'ASC')
-            ->getQuery()
-            ->getResult()
-        ;
+            ->setParameter('customerEmail', $email);
+
+        // Filter by user
+        if ($user) {
+            $usersQuery->andWhere('u.id = :userId')
+                ->setParameter('userId', $user->getId());
+        }
+
+        return $usersQuery->orderBy('u.id', 'ASC')->getQuery()->getResult();
     }
 
     //    public function findOneBySomeField($value): ?User
