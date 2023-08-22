@@ -8,6 +8,9 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Annotations as OA;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,6 +33,34 @@ class UserController extends AbstractController
     ) {
     }
 
+    /**
+     * List of users linked to a customer.
+     *
+     * @OA\Response(
+     *     response=200,
+     *     description="Return the list of users linked to a customer.",
+     *     @OA\JsonContent(
+     *         type="array",
+     *         @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
+     *     )
+     * )
+     * @OA\Parameter(
+     *     name="page",
+     *     description="Page number",
+     *     in="query",
+     *     @OA\Schema(type="int")
+     * )
+     * @OA\Parameter(
+     *     name="limit",
+     *     description="Number of elements per page",
+     *     in="query",
+     *     @OA\Schema(type="int")
+     * )
+     *
+     * @OA\Tag(name="User")
+     *
+     * @throws InvalidArgumentException
+     */
     #[Route('/api/users', name: 'users', methods: ['GET'])]
     #[IsGranted('ROLE_CUSTOMER', message: 'You do not have the required rights to view the list of users.')]
     public function getUserList(TagAwareCacheInterface $cache, Request $request): JsonResponse
@@ -55,6 +86,28 @@ class UserController extends AbstractController
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
+    /**
+     * Create a new user link to a customer.
+     *
+     * @OA\Response(
+     *     response=201,
+     *     description="Returns the user who has just been created.",
+     *     @OA\JsonContent(
+     *         type="array",
+     *         @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
+     *     )
+     * )
+     * @OA\Response(
+     *     response=400,
+     *     description="The user is not valid."
+     * )
+     * @OA\RequestBody(
+     *     description="Create a new user.",
+     *     @OA\JsonContent(ref=@Model(type=User::class, groups={"userCreation"}))
+     * )
+     *
+     * @OA\Tag(name="User")
+     */
     #[Route('api/users', name: 'createUser', methods: ['POST'])]
     #[isGranted('ROLE_CUSTOMER', message: 'You do not have the required rights to create a new user.')]
     public function addUser(Request $request, ValidatorInterface $validator): JsonResponse
@@ -85,6 +138,20 @@ class UserController extends AbstractController
         return new JsonResponse($jsonUser, Response::HTTP_CREATED, [], true);
     }
 
+    /**
+     * Details of a user linked to a customer.
+     * @OA\Response(
+     *     response=200,
+     *     description="Return the details of a user.",
+     *     @OA\JsonContent(
+     *         type="array",
+     *         @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
+     *     )
+     * )
+     * @OA\Tag(name="User")
+     *
+     * @throws InvalidArgumentException
+     */
     #[Route('/api/users/{id}', name: 'detailUser', methods: ['GET'])]
     #[IsGranted('ROLE_CUSTOMER', message: 'You do not have the required rights to see a detailed user.')]
     public function getDetailUser(User $user, TagAwareCacheInterface $cache): JsonResponse
@@ -107,6 +174,21 @@ class UserController extends AbstractController
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
+    /**
+     * Delete a user.
+     *
+     * @OA\Response(
+     *     response=204,
+     *     description="The user has been successfully deleted."
+     * )
+     * @OA\Response(
+     *     response=400,
+     *     description="Not authorized to delete this user."
+     * )
+     * @OA\Tag(name="User")
+     *
+     * @throws InvalidArgumentException
+     */
     #[Route('/api/users/{id}', name: 'deleteUser', methods: ['DELETE'])]
     #[IsGranted('ROLE_CUSTOMER', message: 'You do not have the required rights to delete a user.')]
     public function deleteUser(User $user, TagAwareCacheInterface $cache): JsonResponse
