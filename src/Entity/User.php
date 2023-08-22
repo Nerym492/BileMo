@@ -27,7 +27,7 @@ class User
         minMessage: 'The first name must be at least 3 characters long',
         maxMessage: 'The first name must not exceed 50 characters.'
     )]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'userCreation'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 50)]
@@ -38,13 +38,13 @@ class User
         minMessage: 'The last name must be at least {{ limit }} characters long',
         maxMessage: 'The last name must not exceed {{ limit }} characters.'
     )]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'userCreation'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 180)]
     #[Assert\NotBlank(message: "The email can't be empty.")]
     #[Assert\Email(message: '{{ value }} is not a valid email.')]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'userCreation'])]
     private ?string $email = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
