@@ -32,8 +32,10 @@ class ProductController extends AbstractController
      * @OA\Response(
      *     response=200,
      *     description="Return the list of all products.",
+     *
      *     @OA\JsonContent(
      *         type="array",
+     *
      *         @OA\Items(ref=@Model(type=Product::class, groups={"getProducts"}))
      *     )
      * )
@@ -61,5 +63,38 @@ class ProductController extends AbstractController
         $jsonProductsList = $this->serializer->serialize($productsList, 'json', $context);
 
         return new JsonResponse($jsonProductsList, Response::HTTP_OK, [], true);
+    }
+
+    /**
+     * Details of a product.
+     *
+     * @OA\Response(
+     *     response=200,
+     *     description="Return the detail of a product",
+     *     @OA\JsonContent(
+     *         type="array",
+     *         @OA\Items(ref=@Model(type=Product::class, groups={"getProducts"}))
+     *     )
+     * )
+     * @OA\Tag(name="Product")
+     *
+     * @throws InvalidArgumentException
+     */
+    #[Route('/api/products/{id}', name: 'detailProduct', methods: ['GET'])]
+    #[IsGranted('ROLE_CUSTOMER', message: 'You do not have the required rights to view the a detailed product.')]
+    public function getDetailProduct(Product $product, TagAwareCacheInterface $cache): Response
+    {
+        $cacheId = 'getDetailProduct-'.$product->getId();
+
+        $product = $cache->get($cacheId, function (ItemInterface $item) use ($product) {
+            $item->tag('productsCache');
+
+            return $this->productRepository->find($product);
+        });
+
+        $context = SerializationContext::create()->setGroups('getProducts');
+        $jsonProduct = $this->serializer->serialize($product, 'json', $context);
+
+        return new JsonResponse($jsonProduct, Response::HTTP_OK, [], true);
     }
 }
