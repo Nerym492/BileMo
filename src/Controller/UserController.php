@@ -44,6 +44,10 @@ class UserController extends AbstractController
      *         @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
      *     )
      * )
+     * @OA\Response(
+     *     response=401,
+     *     description="Expired JWT Token"
+     * )
      * @OA\Parameter(
      *     name="page",
      *     description="Page number",
@@ -101,6 +105,10 @@ class UserController extends AbstractController
      *     response=400,
      *     description="The user is not valid."
      * )
+     * @OA\Response(
+     *     response=401,
+     *     description="Expired JWT Token"
+     * )
      * @OA\RequestBody(
      *     description="Create a new user.",
      *     @OA\JsonContent(ref=@Model(type=User::class, groups={"userCreation"}))
@@ -148,6 +156,10 @@ class UserController extends AbstractController
      *         @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
      *     )
      * )
+     * @OA\Response(
+     *     response=401,
+     *     description="Expired JWT Token"
+     * )
      * @OA\Tag(name="User")
      *
      * @throws InvalidArgumentException
@@ -184,6 +196,10 @@ class UserController extends AbstractController
      * @OA\Response(
      *     response=400,
      *     description="Not authorized to delete this user."
+     * )
+     * @OA\Response(
+     *     response=401,
+     *     description="Expired JWT Token"
      * )
      * @OA\Tag(name="User")
      *

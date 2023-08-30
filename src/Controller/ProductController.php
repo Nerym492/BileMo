@@ -39,7 +39,10 @@ class ProductController extends AbstractController
      *         @OA\Items(ref=@Model(type=Product::class, groups={"getProducts"}))
      *     )
      * )
-     *
+     * @OA\Response(
+     *     response=401,
+     *     description="Expired JWT Token"
+     * )
      * @OA\Tag(name="Product")
      *
      * @throws InvalidArgumentException
@@ -75,6 +78,10 @@ class ProductController extends AbstractController
      *         type="array",
      *         @OA\Items(ref=@Model(type=Product::class, groups={"getProducts"}))
      *     )
+     * )
+     * @OA\Response(
+     *     response=401,
+     *     description="Expired JWT Token"
      * )
      * @OA\Tag(name="Product")
      *
