@@ -35,7 +35,7 @@ Creation of a web service exposing an API using the symfony framework.
 9. Copy the following lines in the .env.local file :  
    JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem  
    JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem  
-   JWT_PASSPHRASE=fdd719e8855fdf770a5141fd0afb817b
+   JWT_PASSPHRASE=**yourPassword**
    <br>  
    Replace the JWT_PASSPHRASE value with the pass phrase you defined in the previous command lines.
 10. Launch wamp, mamp or lamp depending on your operating system.
