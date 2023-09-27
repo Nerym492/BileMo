@@ -10,16 +10,16 @@ Creation of a web service exposing an API using the symfony framework.
 
 ## Installation
 
-1. Open a Terminal on the server root or localhost (git bash on Windows).
-2. Run the following command, replacing "FolderName" with the name you want to give to the Project :
+1.  Open a Terminal on the server root or localhost (git bash on Windows).
+2.  Run the following command, replacing "FolderName" with the name you want to give to the Project :
     ```sh
     git clone https://github.com/Nerym492/BileMo FolderName
     ```
-3. Install Symfony CLI (https://symfony.com/download) and composer (https://getcomposer.org/download/)
-4. Create an .env.local file at the root of your project.  
+3.  Install Symfony CLI (https://symfony.com/download) and composer (https://getcomposer.org/download/)
+4.  Create an .env.local file at the root of your project.  
    Copy the following line and complete it according to your database :\
    DATABASE\_URL="mysql://**databaseUser**:**password**@127.0.0.1:3306/**databaseName**?serverVersion=8&charset=utf8mb4"
-5. Install the project's back-end dependencies with Composer :
+5.  Install the project's back-end dependencies with Composer :
     ```sh
     composer install
     ```
@@ -55,4 +55,4 @@ Creation of a web service exposing an API using the symfony framework.
     ```sh
     symfony server:start
     ```
-15. The API is now ready to use !
+15. The API is now ready to use ! Documentation is available at : https://127.0.0.1:8000/api/doc
