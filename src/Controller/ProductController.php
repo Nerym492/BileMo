@@ -43,6 +43,18 @@ class ProductController extends AbstractController
      *     response=401,
      *     description="Expired JWT Token"
      * )
+     * @OA\Parameter(
+     *     name="page",
+     *     description="Page number",
+     *     in="query",
+     *     @OA\Schema(type="int")
+     * )
+     * @OA\Parameter(
+     *     name="limit",
+     *     description="Number of elements per page",
+     *     in="query",
+     *     @OA\Schema(type="int")
+     * )
      * @OA\Tag(name="Product")
      *
      * @throws InvalidArgumentException
