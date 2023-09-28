@@ -115,10 +115,11 @@ class UserController extends AbstractController
      * )
      *
      * @OA\Tag(name="User")
+     * @throws InvalidArgumentException
      */
     #[Route('api/users', name: 'createUser', methods: ['POST'])]
     #[isGranted('ROLE_CUSTOMER', message: 'You do not have the required rights to create a new user.')]
-    public function addUser(Request $request, ValidatorInterface $validator): JsonResponse
+    public function addUser(Request $request, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
     {
         $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
         $errors = $validator->validate($user);
@@ -142,6 +143,9 @@ class UserController extends AbstractController
 
         $context = SerializationContext::create()->setGroups('getUsers');
         $jsonUser = $this->serializer->serialize($user, 'json', $context);
+
+        // Empty the cache
+        $cache->invalidateTags(['usersCache']);
 
         return new JsonResponse($jsonUser, Response::HTTP_CREATED, [], true);
     }
