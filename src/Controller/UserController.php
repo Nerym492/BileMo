@@ -164,6 +164,10 @@ class UserController extends AbstractController
      *     response=401,
      *     description="Expired JWT Token"
      * )
+     * @OA\Response(
+     *     response=404,
+     *     description="Resource not found"
+     * )
      * @OA\Tag(name="User")
      *
      * @throws InvalidArgumentException
@@ -204,6 +208,10 @@ class UserController extends AbstractController
      * @OA\Response(
      *     response=401,
      *     description="Expired JWT Token"
+     * )
+     * @OA\Response(
+     *     response=404,
+     *     description="Resource not found"
      * )
      * @OA\Tag(name="User")
      *
