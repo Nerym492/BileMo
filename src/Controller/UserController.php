@@ -13,6 +13,7 @@ use OpenApi\Annotations as OA;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,7 +30,8 @@ class UserController extends AbstractController
         private CustomerRepository $customerRepository,
         private EntityManagerInterface $entityManager,
         private Security $security,
-        private SerializerInterface $serializer
+        private SerializerInterface $serializer,
+        private ParameterBagInterface $parameterBag
     ) {
     }
 
@@ -39,25 +41,32 @@ class UserController extends AbstractController
      * @OA\Response(
      *     response=200,
      *     description="Return the list of users linked to a customer.",
+     *
      *     @OA\JsonContent(
      *         type="array",
+     *
      *         @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
      *     )
      * )
+     *
      * @OA\Response(
      *     response=401,
      *     description="Expired JWT Token"
      * )
+     *
      * @OA\Parameter(
      *     name="page",
      *     description="Page number",
      *     in="query",
+     *
      *     @OA\Schema(type="int")
      * )
+     *
      * @OA\Parameter(
      *     name="limit",
      *     description="Number of elements per page",
      *     in="query",
+     *
      *     @OA\Schema(type="int")
      * )
      *
@@ -76,6 +85,7 @@ class UserController extends AbstractController
 
         $userList = $cache->get($cacheId, function (ItemInterface $item) use ($page, $limit) {
             $item->tag('usersCache');
+            $item->expiresAfter($this->parameterBag->get('cache_expiration_time'));
 
             return $this->userRepository->findByCustomer(
                 $this->security->getUser()->getUserIdentifier(),
@@ -96,11 +106,14 @@ class UserController extends AbstractController
      * @OA\Response(
      *     response=201,
      *     description="Returns the user who has just been created.",
+     *
      *     @OA\JsonContent(
      *         type="array",
+     *
      *         @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
      *     )
      * )
+     *
      * @OA\Response(
      *     response=400,
      *     description="The user is not valid."
@@ -109,12 +122,15 @@ class UserController extends AbstractController
      *     response=401,
      *     description="Expired JWT Token"
      * )
+     *
      * @OA\RequestBody(
      *     description="Create a new user.",
+     *
      *     @OA\JsonContent(ref=@Model(type=User::class, groups={"userCreation"}))
      * )
      *
      * @OA\Tag(name="User")
+     *
      * @throws InvalidArgumentException
      */
     #[Route('api/users', name: 'createUser', methods: ['POST'])]
@@ -152,14 +168,18 @@ class UserController extends AbstractController
 
     /**
      * Details of a user linked to a customer.
+     *
      * @OA\Response(
      *     response=200,
      *     description="Return the details of a user.",
+     *
      *     @OA\JsonContent(
      *         type="array",
+     *
      *         @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
      *     )
      * )
+     *
      * @OA\Response(
      *     response=401,
      *     description="Expired JWT Token"
@@ -168,6 +188,7 @@ class UserController extends AbstractController
      *     response=404,
      *     description="Resource not found"
      * )
+     *
      * @OA\Tag(name="User")
      *
      * @throws InvalidArgumentException
@@ -182,6 +203,7 @@ class UserController extends AbstractController
 
         $users = $cache->get($cacheId, function (ItemInterface $item) use ($user) {
             $item->tag('usersCache');
+            $item->expiresAfter($this->parameterBag->get('cache_expiration_time'));
 
             return $this->userRepository->findByCustomer(
                 email: $this->security->getUser()->getUserIdentifier(),
@@ -213,6 +235,7 @@ class UserController extends AbstractController
      *     response=404,
      *     description="Resource not found"
      * )
+     *
      * @OA\Tag(name="User")
      *
      * @throws InvalidArgumentException

@@ -10,6 +10,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +23,8 @@ class ProductController extends AbstractController
 {
     public function __construct(
         private ProductRepository $productRepository,
-        private SerializerInterface $serializer
+        private SerializerInterface $serializer,
+        private ParameterBagInterface $parameterBag
     ) {
     }
 
@@ -70,6 +72,7 @@ class ProductController extends AbstractController
 
         $productsList = $cache->get($cacheId, function (ItemInterface $item) use ($page, $limit) {
             $item->tag('productsCache');
+            $item->expiresAfter($this->parameterBag->get('cache_expiration_time'));
 
             return $this->productRepository->findAllWithPagination($page, $limit);
         });
@@ -111,6 +114,7 @@ class ProductController extends AbstractController
 
         $product = $cache->get($cacheId, function (ItemInterface $item) use ($product) {
             $item->tag('productsCache');
+            $item->expiresAfter($this->parameterBag->get('cache_expiration_time'));
 
             return $this->productRepository->find($product);
         });
